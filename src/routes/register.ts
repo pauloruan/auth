@@ -44,6 +44,6 @@ export async function registerRoute(app: FastifyInstance) {
       }
     )
 
-    return reply.status(200).send({ token, user, profile })
+    return reply.status(200).send({ token, newUser, profile })
   })
 }
