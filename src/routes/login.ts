@@ -43,6 +43,6 @@ export async function loginRoute(app: FastifyInstance) {
       }
     )
 
-    return reply.status(200).send({ token })
+    return reply.status(200).send({ token, user, profile })
   })
 }
