@@ -1,4 +1,5 @@
 import { prisma } from "../db/prisma";
+import { hashPassword } from "../lib/hash"
 
 interface ICreateUser {
   name: string;
@@ -17,6 +18,10 @@ export async function createUser(user: ICreateUser) {
   if (verifyUser) {
     throw new Error('User already exists');
   }
+
+  const hashedPassword = await hashPassword(user.password)
+
+  
 
   const newUser = await prisma.user.create({
     data: {
