@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify"
 import { z } from "zod"
 import { prisma } from "../db/prisma"
+import { comparePassword } from "../lib/hash"
 
 export async function loginRoute(app: FastifyInstance) {
   app.post("/login", async (request, reply) => {
@@ -11,19 +12,25 @@ export async function loginRoute(app: FastifyInstance) {
 
     const body = bodySchema.parse(request.body)
 
-    let user = await prisma.user.findUnique({
+    let verifyUser = await prisma.user.findUnique({
       where: {
         email: body.email
       }
     })
 
-    if (!user) {
+    if (!verifyUser) {
       return reply.status(400).send({ error: "User not found" })
+    }
+
+    const isPasswordValid = comparePassword(body.password, verifyUser.password)
+
+    if (!isPasswordValid) {
+      return reply.status(400).send({ error: "Invalid credentials" })
     }
 
     const profile = await prisma.profile.findUnique({
       where: {
-        userId: user.id
+        userId: verifyUser.id
       }
     })
 
@@ -33,8 +40,8 @@ export async function loginRoute(app: FastifyInstance) {
 
     const token = app.jwt.sign(
       {
-        userId: user.id,
-        name: user.name,
+        userId: verifyUser.id,
+        name: verifyUser.name,
         role: profile.role
       },
       {
@@ -43,6 +50,14 @@ export async function loginRoute(app: FastifyInstance) {
       }
     )
 
-    return reply.status(200).send({ token, user, profile })
+    const user = {
+      id: profile.id,
+      name: verifyUser.name,
+      email: verifyUser.email,
+      enrollment: profile.enrollment,
+      role: profile.role
+    }
+
+    return reply.status(200).send({ token, user })
   })
 }
