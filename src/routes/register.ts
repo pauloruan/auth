@@ -14,17 +14,19 @@ export async function registerRoute(app: FastifyInstance) {
 
     const body = bodySchema.parse(request.body)
 
-    let user = await prisma.user.findUnique({
+    let verifyUser = await prisma.user.findUnique({
       where: {
         email: body.email
       }
     })
 
-    if (user) {
+    if (verifyUser) {
       return reply.status(400).send({ error: "Email already in use" })
     }
 
-    const newUser = await createUser(body)
+    const newUser = await createUser({
+      ...body
+    })
 
     const profile = await createProfile(newUser.id)
 
@@ -44,6 +46,14 @@ export async function registerRoute(app: FastifyInstance) {
       }
     )
 
-    return reply.status(200).send({ token, newUser, profile })
+    const user = {
+      id: profile.id,
+      name: newUser.name,
+      email: newUser.email,
+      enrollment: profile.enrollment,
+      role: profile.role
+    }
+
+    return reply.status(200).send({ token, user })
   })
 }
