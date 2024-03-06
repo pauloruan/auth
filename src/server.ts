@@ -18,7 +18,7 @@ app.register(videoRoute)
 async function start() {
   try {
     await app.listen({ port: Number(env.PORT), host: env.HOST })
-    app.log.info(`🚀 HTTP server running on ${app.server.address}`)
+    app.log.info("🚀 HTTP server running.")
   } catch (err) {
     app.log.error(err)
     process.exit(1)
