@@ -5,6 +5,7 @@ import { env } from "./lib/env"
 import { loginRoute } from "./routes/login"
 import { registerRoute } from "./routes/register"
 import { videoRoute } from "./routes/videos"
+import { profileRoute } from "./routes/profiles"
 
 const app: FastifyInstance = fastify({ logger: true })
 
@@ -14,6 +15,7 @@ app.register(jwt, { secret: env.JWT_SECRET })
 app.register(loginRoute)
 app.register(registerRoute)
 app.register(videoRoute)
+app.register(profileRoute)
 
 async function start() {
   try {
